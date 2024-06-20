@@ -1,4 +1,4 @@
-sqlite == 3.43.2
+pysqlite3-binary 
 beautifulsoup4==4.12.3 
 chromadb==0.5.3 
 llama-index-embeddings-huggingface==0.2.2
