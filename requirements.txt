@@ -1,0 +1,10 @@
+
+beautifulsoup4==4.12.3 
+chromadb==0.5.3 
+llama-index-embeddings-huggingface==0.2.2
+llama-index-llms-huggingface==0.2.3
+llama-index-llms-ollama==0.1.5
+llama-index-vector-stores-chroma==0.1.9
+llama-index==0.10.47
+pathlib==1.0.1
+streamlit==1.35.0
