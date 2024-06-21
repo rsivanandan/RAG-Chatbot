@@ -1,8 +1,5 @@
 from llama_index.llms.ollama import Ollama
 from llama_index.core.chat_engine.types import ChatMode
-import(‘pysqlite3’)
-import sys
-sys.modules[‘sqlite3’] = sys.modules.pop(‘pysqlite3’)
 import chromadb
 import streamlit as st
 from pathlib import Path
