@@ -13,6 +13,7 @@ from llama_index.llms.huggingface import HuggingFaceInferenceAPI
 import chromadb
 import streamlit as st
 
+
 @st.cache_resource(show_spinner=False)
 def init_llm_hf(model_name, HF_token) -> None:
 
@@ -40,11 +41,10 @@ def init_llm_ollama():
 @st.cache_resource(show_spinner=False)
 def init_index() -> VectorStoreIndex:
     # Load from disk
-
-    load_client = chromadb.PersistentClient(path="./chroma_db")
-
-    # Fetch the collection
-    chroma_collection = load_client.get_collection("tsr_collection")
+    
+    chroma_client = chromadb.PersistentClient(path="./chroma_db")
+   # Fetch the collection
+    chroma_collection = chroma_client.get_collection("tsr_collection")
 
     # Fetch the vector store
 

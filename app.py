@@ -11,11 +11,39 @@ from rag_functions import (
 )
 import shutil
 import os
+
+
+def chatbot(index) -> None:
+    if "chat_engine" not in st.session_state.keys():
+            st.session_state.chat_engine = index.as_chat_engine(
+                chat_mode="condense_question", streaming=True, verbose=True
+                )
+    if "messages" not in st.session_state.keys():
+            st.session_state.messages = [
+                {
+                "role": "assistant",
+                "content": "Ask me anything",
+                }
+            ]
+    if prompt := st.chat_input("Ask me a question"):
+            st.session_state.messages.append({"role": "user", "content": prompt})
+    for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.empty() #this is unneeded however this is added to fix the ghosting text (double text)
+                st.write(message["content"])
+
+    if st.session_state.messages[-1]["role"] != "assistant":
+            with st.chat_message("assistant"):
+                with st.spinner("Thinking..."):
+                    response = st.session_state.chat_engine.chat(message=prompt)
+                    st.write(response.response)
+                    message = {"role": "assistant", "content": response.response}
+                    st.session_state.messages.append(message)
     
 st.set_page_config(
     page_title="RAG Chatbot",
     page_icon="./images/llama.png",
-    layout="centered",
+    layout="wide",
     initial_sidebar_state="auto",
     menu_items=None,
 )
@@ -45,38 +73,25 @@ def main() -> None:
                 "*Ensure that you're running Ollama locally and also have downloaded the llama3 model*"
             )
             init_llm_ollama()
-            index = init_index()
+            try:
+                index = init_index()
+                chatbot(index)
+            except:
+                st.info("Please upload documents first using Document Ingestion")
+                st.stop()
         elif llmtype == "Huggingface Mistral":
             HF_Token = st.sidebar.text_input("Huggingface Token", type="password")
             st.sidebar.write(
                 "*Sigup for a free account at https://huggingface.co/. Create a free API key and input above*"
             )
             init_llm_hf("mistralai/Mistral-7B-Instruct-v0.3", HF_Token)
-            index = init_index()
-        if "chat_engine" not in st.session_state.keys():
-            st.session_state.chat_engine = index.as_chat_engine(
-                chat_mode="condense_question", streaming=True, verbose=True
-                )
-        if "messages" not in st.session_state.keys():
-            st.session_state.messages = [
-                {
-                "role": "assistant",
-                "content": "Ask me anything",
-                }
-            ]
-        if prompt := st.chat_input("Ask me a question"):
-            st.session_state.messages.append({"role": "user", "content": prompt})
-        for message in st.session_state.messages:
-            with st.chat_message(message["role"]):
-                st.write(message["content"])
-
-        if st.session_state.messages[-1]["role"] != "assistant":
-            with st.chat_message("assistant"):
-                with st.spinner("Thinking..."):
-                    response = st.session_state.chat_engine.chat(message=prompt)
-                    st.write(response.response)
-                    message = {"role": "assistant", "content": response.response}
-                    st.session_state.messages.append(message)
+            try:
+                index = init_index()
+                chatbot(index)
+            except:
+                st.info("Please upload documents first using Document Ingestion")
+                st.stop()
+        
 
     elif choice == "Document Ingestion":
         st.subheader("Document Ingestion")
@@ -88,11 +103,9 @@ def main() -> None:
                     shutil.rmtree("./data")
                     os.makedirs("data")
                     Clear_Chat()
-                    # load_client = chromadb.PersistentClient(path="./chroma_db")
-                    # load_client.clear_system_cache
                     st.success("Successfully Reinitialized")
                 except:
-                    os.makedirs("data")
+                    #os.makedirs("data")
                     st.error("Nothing to initialize")
         with st.form(key="FileUpload", clear_on_submit=True):
             uploaded_file = st.file_uploader(
